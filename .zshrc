@@ -5,6 +5,10 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 source $HOME/.exports
+# Set TERM to xterm-256color if it is st-256color
+if [[ $TERM == "st-256color" ]]; then
+  export TERM="xterm-256color"
+fi
 
 ###############
 ### Exports ###
@@ -13,9 +17,8 @@ export PATH=$HOME/.local/bin:$PATH
 # Java Classpath and version
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 export PATH=$PATH:$JAVA_HOME/bin
-# ruby to PATH
-export PATH=$PATH:$HOME/.local/share/gem/ruby/3.0.0/bin
-export PATH=$PATH:/usr/lib/ruby/gems/3.0.0
+# Rust to Path
+export PATH="$PATH:$HOME/.cargo/bin"
 # Path to your oh-my-zsh installation.
 export ZSH="${HOME}/.oh-my-zsh"
 export EDITOR="nvim"
@@ -43,8 +46,19 @@ export PATH=$HOME/fvm/default/bin:$PATH
 # golang
 export GOPATH=$HOME/Tools/go
 export PATH=$PATH:$GOPATH/bin
+# php
+export PATH=$PATH:$HOME/.config/composer/vendor/bin
+# Jetbrains Toolbox
+export PATH=$PATH:$HOME/.local/share/JetBrains/Toolbox/bin
+# Zoxide command
+export ZOXIDE_CMD_OVERRIDE='cd'
+# QT settings
+export QT_QPA_PLATFORMTHEME="qt5ct"
+# GTK settings
+export GTK_THEME="Arc:dark"
 
 #################
+
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -68,11 +82,22 @@ plugins=(
     autoupdate
 	zsh-autosuggestions
 	zsh-syntax-highlighting
-	vi-mode
+	zsh-vi-mode
 	colorize
     docker
     docker-compose
+    rails
+    ruby
+    rake
+    zoxide
+    poetry
 )
+
+
+# Vim mode settings
+ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BEAM
+ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK
+ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_UNDERLINE
 
 source $ZSH/oh-my-zsh.sh
 source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
@@ -102,6 +127,7 @@ alias lsla='lsd -la'
 
 #alias for faster *rc editing
 alias vimrc='vim ~/.config/nvim/init.lua'
+alias ghostrc='vim ~/.config/ghostty/config'
 alias bashrc='vim ~/.bashrc'
 alias zshrc='vim ~/.zshrc'
 alias picomrc="vim ~/.config/picom/picom.conf"
@@ -133,13 +159,17 @@ alias dlsa='docker ps -a'
 alias dso='docker stop'
 alias dsa='docker start'
 alias doc='docker-compose'
+alias dcu='docker compose up'
+alias dcud='docker compose up -d'
+alias dcd='docker compose down'
 
 # flutter
 alias fpg='flutter pub get'
 alias fpa='flutter pub add'
+alias femu='MESA_LOADER_DRIVER_OVERRIDE=i965 LIBGL_ALWAYS_SOFTWARE=0 ANDROID_EMULATOR_USE_VULKAN=true emulator -avd Resizable -gpu host'
 # managed flutter
-alias fvr='fvm flutter run'
-alias dbrw='fvm dart run build_runner watch'
+alias fvr='flutter run'
+alias dbrw='dart run build_runner watch -d'
 
 # zip everything that is checked into git used like this: gitzip [OUTPUT_FILE]
 alias gitzip="git archive HEAD -o "
@@ -154,6 +184,12 @@ alias mdt='cd ~/Projects/Mundet'
 alias mdtrm='cd ~/Projects/Mundet/mundet_recipe_maker'
 alias mdtct='cd ~/Projects/Mundet/mundet-flutter'
 alias mdtsl='cd ~/Projects/Mundet/mundet_shared_lib'
+alias mdtnn='cd ~/Projects/Mundet/number_nexus'
+alias efgh='cd ~/Projects/EFGH/'
+alias agt='cd ~/Projects/EFGH/Agents/'
+alias efghas='cd ~/Projects/EFGH/Agents/astrosistant-server/'
+alias astc='cd ~/Projects/EFGH/Agents/astrosistant-client/'
+alias wiki='cd ~/Projects/EFGH/wiki/'
 
 # keep screen on
 alias caff='xset s off -dpms'
@@ -166,6 +202,9 @@ alias velo='~/.local/share/PatchKit/Apps/d5f20cca/app/velocidrone.x86_64'
 alias ma='cd ~/Uni/MA/master_thesis'
 alias mai='cd ~/Uni/MA/implementations'
 alias mar='cd ~/Uni/MA/implementations/rest/'
+alias mab='cd ~/Uni/MA/backend_prototype/cooking_together_api/'
+
+alias yam='command ya'
 
 # open the last editet chapter of the master_thesis
 mat() {
@@ -181,7 +220,6 @@ resize() {
 }
 
 # yay/ paru refresh dwmblocks
-# TODO upadte to paru
 yay() {
 	# /usr/bin/yay "$@"
     /usr/bin/paru "$@"
@@ -244,10 +282,68 @@ function ya() {
 	rm -f -- "$tmp"
 }
 
+# ruby to PATH
+# export GEM_HOME="$HOME/.asdf/installs/ruby/3.4.1/lib/ruby/gems/3.4.0"
+# export GEM_PATH="$HOME/.asdf/installs/ruby/3.4.1/lib/ruby/gems/3.4.0"
+# export USER_GEM_HOME="$HOME/.asdf/installs/ruby/3.4.1/lib/ruby/gems/3.4.0"
+# . /opt/asdf-vm/asdf.sh
+# export GEM_HOME="$(gem env user_gemhome)"
+# export PATH="$PATH:$GEM_HOME/bin"
+source /usr/share/chruby/chruby.sh
+chruby 3.4.5
 
 ################
 #language stuff#
 ################
+# Python venv wrapper
+# usage
+# $ mkvenv myvirtualenv # creates venv under ~/.virtualenvs/
+# $ venv myvirtualenv   # activates venv
+# $ deactivate          # deactivates venv
+# $ rmvenv myvirtualenv # removes venv
+
+export VENV_HOME="$HOME/.virtualenvs"
+[[ -d $VENV_HOME ]] || mkdir $VENV_HOME
+
+lsvenv() {
+  ls -1 $VENV_HOME
+}
+
+venv() {
+  if [ $# -eq 0 ]
+    then
+      echo "Please provide venv name"
+    else
+      source "$VENV_HOME/$1/bin/activate"
+  fi
+}
+
+mkvenv() {
+  if [ $# -eq 0 ]
+    then
+      echo "Please provide venv name"
+    else
+      python3 -m venv $VENV_HOME/$1
+  fi
+}
+
+rmvenv() {
+  if [ $# -eq 0 ]
+    then
+      echo "Please provide venv name"
+    else
+      rm -r $VENV_HOME/$1
+  fi
+}
+
+mkikernel() {
+    if [ $# -eq 0 ]
+      then
+        echo "Please provide venv name"
+      else
+        python3 -m ipykernel install --user --name $1
+    fi
+}
 
 # enable history support in erlang
 # export ERL_AFLAGS="-kernel shell_history enabled"
@@ -258,8 +354,18 @@ function ya() {
 source /home/paul/.config/broot/launcher/bash/br
 source /usr/share/nvm/init-nvm.sh
 
+
 ## [Completion]
 ## Completion scripts setup. Remove the following line to uninstall
 [[ -f /home/paul/.dart-cli-completion/zsh-config.zsh ]] && . /home/paul/.dart-cli-completion/zsh-config.zsh || true
 ## [/Completion]
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
 
+# bun completions
+[ -s "/home/paul/.bun/_bun" ] && source "/home/paul/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
