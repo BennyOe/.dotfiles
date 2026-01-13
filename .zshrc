@@ -43,6 +43,8 @@ export PATH="$(yarn global bin):$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 # managed flutter
 export PATH=$HOME/fvm/default/bin:$PATH
+# Oracle client
+export PATH=/opt/oracle/instantclient_23_26/:$PATH
 # golang
 export GOPATH=$HOME/Tools/go
 export PATH=$PATH:$GOPATH/bin
@@ -125,12 +127,16 @@ alias lsl='lsd -a'
 alias ls='lsd'
 alias lsla='lsd -la'
 
+# alias for kanban application
+alias tkb='tui-kanban'
+
 #alias for faster *rc editing
 alias vimrc='vim ~/.config/nvim/init.lua'
+alias zshrc='vim ~/.zshrc'
 alias ghostrc='vim ~/.config/ghostty/config'
 alias bashrc='vim ~/.bashrc'
-alias zshrc='vim ~/.zshrc'
 alias picomrc="vim ~/.config/picom/picom.conf"
+alias sshc="vim ~/.ssh/config"
 
 # git aliases
 alias gac='git add . && git commit -a'
@@ -221,6 +227,7 @@ resize() {
 
 # yay/ paru refresh dwmblocks
 yay() {
+	#    echo "Using old yay again"
 	# /usr/bin/yay "$@"
     /usr/bin/paru "$@"
 	pkill -RTMIN+1 dwmblocks
@@ -344,6 +351,24 @@ mkikernel() {
         python3 -m ipykernel install --user --name $1
     fi
 }
+
+initvenv() {
+    if [ $# -eq 0 ]
+      then
+        echo "Please provide venv name"
+      else
+        mkvenv $1
+        venv $1
+        mkikernel $1
+    fi
+}
+
+daily_obsidian_note_qs() {
+    cd ~/quatro/notes/daily/
+    nvim +"Obsidian today" welcome.md 
+}
+
+alias qsdn='daily_obsidian_note_qs'
 
 # enable history support in erlang
 # export ERL_AFLAGS="-kernel shell_history enabled"
