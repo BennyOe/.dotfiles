@@ -10,7 +10,7 @@ fi
 ###############
 export PATH=$PATH:$HOME/.local/bin
 # Java Classpath and version
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+export JAVA_HOME=/usr/lib/jvm/java-21-temurin
 export PATH=$PATH:$JAVA_HOME/bin
 # ruby to PATH
 export PATH=$PATH:$HOME/.gem/ruby/2.7.0/bin
@@ -185,4 +185,12 @@ export SDKMAN_DIR="$HOME/.sdkman"
 ## Completion scripts setup. Remove the following line to uninstall
 [[ -f /home/benni/.dart-cli-completion/zsh-config.zsh ]] && . /home/benni/.dart-cli-completion/zsh-config.zsh || true
 ## [/Completion]
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
 
+# bun completions
+[ -s "/home/benni/.bun/_bun" ] && source "/home/benni/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

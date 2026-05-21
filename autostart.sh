@@ -39,6 +39,3 @@ xcape -e 'Control_L=Escape' &
 # thunar daemon for mounting drives
 thunar --daemon &
 
-# Hue Control
-~/.local/bin/lightsOn
-

@@ -1,4 +1,4 @@
-"======================================================================================================================
+======================================================================================================================
 " Useful hints to setup the IDE
 
 " To cycle with tab through code completion options set the 'selectNextCompletionOption' in the settings to tab and remove tab from the standard behaviour
@@ -14,6 +14,7 @@ set ignorecase                    " ignore case in search patterns
 set smartcase                     " no ignore case when pattern is uppercase
 set incsearch                     " show search results while typing
 set wrapscan                      " searches wrap around the end of the file
+set timeoutlen=270                " timeout before command is executed
 set history=10000                 " keep x lines of command line history
 set scrolloff=5 sidescrolloff=10  " keep some lines before and after the cursor visible
 
@@ -33,7 +34,6 @@ nmap <leader><leader>h <Action>(ActivateProjectToolWindow)
 " editor
 nmap + :action EditorIncreaseFontSize<CR>
 nmap - :action EditorDecreaseFontSize<CR>
-nmap = :action EditorResetFontSize<CR>
 
 " movements
 vmap <c-j> <Action>(MoveLineDown)
@@ -57,15 +57,11 @@ nmap <leader>P "+P
 vmap <leader>p "+p
 vmap <leader>P "+P
 
-" switching tabs
-nmap <c-h> <action>(PreviousTab)
-nmap <c-l> <action>(NextTab)
-
 " split views
-nnoremap <leader>V :vsplit<CR>
-nnoremap <leader>H :split<CR>
-nmap <leader>x <Action>(CloseContent)
-nmap <leader>sx <Action>(Unsplit)
+nnoremap <leader>sv :vsplit<CR>
+nnoremap <leader>sh :split<CR>
+nmap <leader>x <Action>(CloseAllEditors)
+nmap <leader><leader>x <Action>(HideActiveWindow)
 
 " split navigation
 nmap <leader>h <Action>(PrevSplitter)
@@ -76,11 +72,9 @@ nmap <leader><leader>rr <Action>(Run)
 nmap <leader><leader>rd <Action>(Debug)
 nmap <leader><leader>ra <Action>(Rerun)
 nmap <leader><leader>rs <Action>(Stop)
+nmap <leader><leader>rb <Action>(CompileDirty)
 
-" code commands
-nmap <leader>g <Action>(Generate)
-nmap <leader>rn <Action>(RenameElement)
-nmap <leader>sw <Action>(SurroundWith)
+" new file
 nmap <leader>nc <Action>(Kotlin.NewFile)
 nmap <leader>nf <Action>(NewFile)
 nmap <leader>nd <Action>(NewDir)
@@ -98,15 +92,19 @@ nmap <leader>e <Action>(GotoNextError)
 nmap <leader>E <Action>(GotoPreviousError)
 
 " highlight usages
-nmap <leader>n <Action>(HighlightUsagesInFile)
-nmap <leader><leader>n :noh<CR>
-nmap N <Action>(GotoNextElementUnderCaretUsage)
+nmap <leader>n :set hlsearch<CR>*
+nmap <leader><leader>n :nohlsearch<CR>
 
 " goto
 nmap gi :action GotoImplementation<CR>
 nmap gs :action GotoSuperMethod<CR>
 nmap gd :action GotoDeclaration<CR>
+" Open right split, then go to declaration there
+set splitright
+nnoremap ggd :vsplit \| action GotoDeclaration<CR>
 nmap gt :action GotoTest<CR>
+nmap gp <Action>(ManageRecentProjects)
+nmap gr <Action>($LRU)
 
 " imports
 nmap <leader>oi <Action>(OptimizeImports)
@@ -118,26 +116,74 @@ map <leader>fr <Action>(ReformatCode)
 nmap <leader>t <Action>(ActivateTerminalToolWindow)
 
 "  show
-nmap <leader>rf <Action>(RecentFiles)
 nmap <leader>q <Action>(ShowHoverInfo)
+nmap <leader><leader>q <Action>(QuickImplementations)
 nmap <leader>a <Action>(Annotate)
-nmap <leader>u <Action>(FindUsages)
+nmap <leader>su <Action>(ShowUsages)
+nmap <leader>sa <Action>(FindUsages)
+nmap <leader>sh <Action>(CallHierarchy)
+nmap <leader>sp <Action>(ParameterInfo)
+nmap <leader>ss <Action>(FileStructurePopup)
 
 " Bookmarks and Breakpoints
-nmap <leader>f <Action>(ToggleBookmark)
+nmap <leader>b <Action>(ToggleLineBreakpoint)
+nmap <leader>be <Action>(ToggleBreakpointEnabled)
+nmap <leader><leader>b <Action>(ViewBreakpoints)
+
+nmap <leader>B <Action>(ToggleBookmark)
 map {{ <Action>(GotoPreviousBookmark)
 map }} <Action>(GotoNextBookmark)
-nmap <leader>b <Action>(ToggleLineBreakpoint)
+nmap <leader><leader>B <Action>(ActivateBookmarksToolWindow)
 
 " switch tabs with backspace
 nmap <BS> <Action>(Switcher)
+
+" folding / collapsing code
+nmap <leader>z <Action>(CollapseRegion)
+nmap <leader>Z <Action>(ExpandRegion)
 
 " git
 nmap <leader><leader>gl <Action>(Git.Pull)
 nmap <leader><leader>gp <Action>(Vcs.Push)
 nmap <leader><leader>gc <Action>(CheckinProject)
 nmap <leader><leader>gr <Action>(Git.Rebase)
+nmap <leader><leader>gh <Action>(Vcs.ShowTabbedFileHistory)
+vmap <leader><leader>gh <Action>(Vcs.ShowHistoryForBlock)
+nmap <leader><leader>gb <Action>(Vcs.RollbackChangedLines)
 
-" find in files
-nmap <leader>ff <Action>(FindInPath)
-r> :comment<CR>
+" find
+nmap <leader>ff <Action>(GotoFile)
+nmap <leader>fg <Action>(FindInPath)
+vmap <leader>fg <Action>(FindInPath)
+nmap <leader>fc <Action>(GotoClass)
+vmap <leader>fc <Action>(GotoClass)
+
+" copilot
+nmap <leader>ca <Action>(copilot.enableCopilot)
+nmap <leader>cA <Action>(copilot.disableCopilot)
+nmap <leader>cc <Action>(copilot.chat.inline)
+
+" debugger
+nmap de <Action>(EvaluateExpression)
+vmap de <Action>(EvaluateExpression)
+nmap df <Action>(StepOver)
+nmap dj <Action>(StepInto)
+nmap dk <Action>(StepOut)
+nmap dg <Action>(Resume)
+nmap dm <Action>(XDebugger.MuteBreakpoints)
+
+" refactor
+vmap <leader>ef <Action>(ExtractFunction)
+nmap <leader>ef <Action>(ExtractFunction)
+vmap <leader>ev <Action>(IntroduceVariable)
+nmap <leader>ev <Action>(IntroduceVariable)
+vmap <leader>ec <Action>(IntroduceConstant)
+nmap <leader>ec <Action>(IntroduceConstant)
+vmap <leader>ee <Action>(Refactorings.QuickListPopupAction)
+nmap <leader>ee <Action>(Refactorings.QuickListPopupAction)
+nmap <leader>g <Action>(Generate)
+nmap <leader>rn <Action>(RenameElement)
+nmap <leader>w <Action>(SurroundWith)
+vmap <leader>w <Action>(SurroundWith)
+nmap <leader>u <Action>(Unwrap)
+vmap <leader>u <Action>(Unwrap)
